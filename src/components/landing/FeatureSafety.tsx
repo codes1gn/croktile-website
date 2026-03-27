@@ -6,27 +6,28 @@ import { useTranslations } from "next-intl";
 import { FeatureCard } from "./FeatureCard";
 import { ScrollReveal } from "./ScrollReveal";
 
-const checks = [
-  { label: "Tiling mismatch", status: "error", detail: "chunk size 4 does not divide input shape[2] = 10", line: "12" },
-  { label: "Shape incompatible", status: "error", detail: "lhs inner dim (K=64) != rhs inner dim (K=32)", line: "18" },
-  { label: "Memory bounds", status: "pass", detail: "All shared memory accesses within 48KB limit", line: "" },
-  { label: "DMA alignment", status: "pass", detail: "All DMA operations aligned to 128-byte boundary", line: "" },
+const compileChecks = [
+  { module: "earlysema.cpp", count: 189, category: "Early Semantic Analysis", examples: ["type mismatch in SELECT", "invalid parallel nesting", "undeclared variable in __co__ scope"] },
+  { module: "semacheck.cpp", count: 65, category: "Semantic Validation", examples: ["inconsistent shapes for spanned-operation", "invalid DMA target memory space", "MMA: matrix shapes do not match"] },
+  { module: "typeinfer.cpp", count: 38, category: "Type Inference", examples: ["cannot infer element type", "conflicting types in reduction", "incompatible accumulator dtype"] },
+  { module: "shapeinfer.cpp", count: 33, category: "Shape Inference", examples: ["tiling factor exceeds data size", "index out of bounds for dimension", "span size mismatch in chunkat"] },
+  { module: "loop_vectorize.cpp", count: 16, category: "Loop Vectorization", examples: ["vectorize factor not divisible", "invalid loop bounds for SIMD"] },
+  { module: "assess.cpp", count: 4, category: "Static Assessment", examples: ["shape incompatibility proven at compile time"] },
+  { module: "codegen + others", count: 8, category: "Code Generation", examples: ["target architecture constraint violated", "DMA size exceeds 2^32 bytes"] },
 ];
 
-const runtimeLines = [
-  { text: "$ croktile run kernel.co --runtime-checks", delay: 0 },
-  { text: "", delay: 0.1 },
-  { text: "[CHECK] Verifying tensor shapes at entry...", delay: 0.3 },
-  { text: "[CHECK] lhs: [128, 256] ✓", delay: 0.5 },
-  { text: "[CHECK] rhs: [256, 512] ✓", delay: 0.7 },
-  { text: "[CHECK] Tiling factors valid ✓", delay: 0.9 },
-  { text: "[CHECK] Shared memory: 32KB / 48KB ✓", delay: 1.1 },
-  { text: "[PASS] All 4 runtime checks passed.", delay: 1.4 },
+const runtimeChecks = [
+  { type: "runtime_check()", count: 128, what: "Host-side shape/alignment checks emitted by codegen", examples: ["k % 64 == 0", "DMA transfer size within limit", "tensor dimension > 0"] },
+  { type: "choreo_assert()", count: 558, what: "Verification assertions in test/benchmark kernels", examples: ["values are not equal", "result shape matches expected", "memory bounds valid"] },
+  { type: "#error", count: 633, what: "Compile-time config validation in kernel headers", examples: ["WARP_M must be 64 for WGMMA", "TILE_K must equal 2 * PACKED_TILE_K", "SWIZ must be 32, 64, or 128"] },
 ];
+
+const totalCompileChecks = compileChecks.reduce((s, c) => s + c.count, 0);
+const totalRuntimeChecks = runtimeChecks.reduce((s, c) => s + c.count, 0);
 
 export function FeatureSafety() {
   const t = useTranslations("features.safety");
-  const [showRuntime, setShowRuntime] = useState(false);
+  const [activeTab, setActiveTab] = useState<"compile" | "runtime">("compile");
 
   const points = [t("point1"), t("point2"), t("point3")];
 
@@ -56,95 +57,145 @@ export function FeatureSafety() {
           ))}
         </div>
 
-        {/* Interactive compile-time checks */}
+        {/* Toggle: compile vs runtime */}
         <ScrollReveal delay={0.15}>
-          <div className="rounded-xl border overflow-hidden">
-            <div className="px-4 py-2.5 border-b bg-[var(--muted)] flex items-center justify-between">
-              <span className="text-xs font-medium text-[var(--muted-foreground)]">
-                Compile-time analysis
-              </span>
-              <span className="text-xs text-red-500 font-mono">2 errors</span>
-            </div>
-            <div className="divide-y">
-              {checks.map((check, i) => (
-                <motion.div
-                  key={check.label}
-                  initial={{ opacity: 0, x: -12 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.15 + i * 0.1 }}
-                  className="flex items-center gap-3 px-4 py-3 hover:bg-[var(--muted)]/50 transition-colors cursor-default group"
-                >
-                  {check.status === "error" ? (
-                    <span className="w-5 h-5 rounded-full bg-red-500/15 flex items-center justify-center shrink-0">
-                      <svg className="w-3 h-3 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                        <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-                      </svg>
-                    </span>
-                  ) : (
-                    <span className="w-5 h-5 rounded-full bg-mint-500/15 flex items-center justify-center shrink-0">
-                      <svg className="w-3 h-3 text-mint-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                        <path d="M20 6L9 17l-5-5" />
-                      </svg>
-                    </span>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium">{check.label}</div>
-                    <div className="text-xs text-[var(--muted-foreground)] truncate opacity-0 group-hover:opacity-100 transition-opacity">
-                      {check.detail}
-                    </div>
-                  </div>
-                  {check.line && (
-                    <span className="text-xs font-mono text-red-400">L{check.line}</span>
-                  )}
-                </motion.div>
-              ))}
-            </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setActiveTab("compile")}
+              className={`flex-1 py-2.5 rounded-lg text-xs font-medium transition-all ${
+                activeTab === "compile"
+                  ? "bg-red-500/10 text-red-500 border border-red-500/30"
+                  : "border hover:bg-[var(--muted)]"
+              }`}
+            >
+              Compile-time &middot; {totalCompileChecks} checks
+            </button>
+            <button
+              onClick={() => setActiveTab("runtime")}
+              className={`flex-1 py-2.5 rounded-lg text-xs font-medium transition-all ${
+                activeTab === "runtime"
+                  ? "bg-mint-500/10 text-mint-500 border border-mint-500/30"
+                  : "border hover:bg-[var(--muted)]"
+              }`}
+            >
+              Runtime &middot; {totalRuntimeChecks} assertions
+            </button>
           </div>
         </ScrollReveal>
 
-        {/* Runtime check toggle */}
-        <ScrollReveal delay={0.35}>
-          <button
-            onClick={() => setShowRuntime(!showRuntime)}
-            className="w-full py-2.5 px-4 rounded-lg text-sm font-medium border
-                       hover:bg-[var(--muted)] transition-all text-left flex items-center justify-between"
-          >
-            <span>Runtime verification</span>
-            <motion.svg
-              animate={{ rotate: showRuntime ? 180 : 0 }}
-              className="w-4 h-4 text-[var(--muted-foreground)]"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M6 9l6 6 6-6" />
-            </motion.svg>
-          </button>
-
-          <AnimatePresence>
-            {showRuntime && (
+        <ScrollReveal delay={0.2}>
+          <AnimatePresence mode="wait">
+            {activeTab === "compile" ? (
               <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="overflow-hidden"
+                key="compile"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                className="rounded-xl border overflow-hidden"
               >
-                <div className="rounded-xl border border-mint-500/30 bg-mint-500/5 overflow-hidden mt-2 p-4 font-mono text-xs">
-                  {runtimeLines.map((line, i) => (
+                <div className="px-4 py-2.5 border-b bg-[var(--muted)] flex items-center justify-between">
+                  <span className="text-xs font-medium text-[var(--muted-foreground)]">
+                    Compiler Error1() call sites across modules
+                  </span>
+                  <span className="text-xs text-red-500 font-mono font-bold">{totalCompileChecks}</span>
+                </div>
+                <div className="divide-y">
+                  {compileChecks.map((check, i) => (
                     <motion.div
-                      key={i}
+                      key={check.module}
                       initial={{ opacity: 0, x: -8 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: line.delay }}
-                      className={`leading-6 ${
-                        line.text.includes("PASS") ? "text-mint-500 font-bold" :
-                        line.text.includes("✓") ? "text-mint-600 dark:text-mint-400" : ""
-                      }`}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: i * 0.06 }}
+                      className="px-4 py-2.5 hover:bg-[var(--muted)]/50 transition-colors cursor-default group"
                     >
-                      {line.text}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="w-4 h-4 rounded bg-red-500/15 flex items-center justify-center shrink-0">
+                            <svg className="w-2.5 h-2.5 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                          </span>
+                          <span className="text-xs font-medium">{check.category}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-mono text-[var(--muted-foreground)]">{check.module}</span>
+                          <span className="text-xs font-bold text-red-500 w-8 text-right">{check.count}</span>
+                        </div>
+                      </div>
+                      <div className="mt-1 flex flex-wrap gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {check.examples.map((ex) => (
+                          <span key={ex} className="text-[9px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 font-mono">{ex}</span>
+                        ))}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+                {/* Bar chart */}
+                <div className="px-4 py-3 border-t bg-[var(--muted)]/30">
+                  <div className="flex items-end gap-1 h-12">
+                    {compileChecks.map((check) => (
+                      <motion.div
+                        key={check.module}
+                        initial={{ height: 0 }}
+                        whileInView={{ height: `${(check.count / 189) * 100}%` }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5 }}
+                        className="flex-1 bg-red-500/60 rounded-t hover:bg-red-500 transition-colors"
+                        title={`${check.category}: ${check.count}`}
+                      />
+                    ))}
+                  </div>
+                  <div className="flex gap-1 mt-1">
+                    {compileChecks.map((check) => (
+                      <span key={check.module} className="flex-1 text-[8px] text-center text-[var(--muted-foreground)] truncate">
+                        {check.module.replace(".cpp", "")}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="runtime"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                className="rounded-xl border overflow-hidden"
+              >
+                <div className="px-4 py-2.5 border-b bg-[var(--muted)] flex items-center justify-between">
+                  <span className="text-xs font-medium text-[var(--muted-foreground)]">
+                    Runtime assertions across test &amp; benchmark .co files
+                  </span>
+                  <span className="text-xs text-mint-500 font-mono font-bold">{totalRuntimeChecks}</span>
+                </div>
+                <div className="divide-y">
+                  {runtimeChecks.map((check, i) => (
+                    <motion.div
+                      key={check.type}
+                      initial={{ opacity: 0, x: -8 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: i * 0.08 }}
+                      className="px-4 py-3 hover:bg-[var(--muted)]/50 transition-colors cursor-default group"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="w-4 h-4 rounded bg-mint-500/15 flex items-center justify-center shrink-0">
+                            <svg className="w-2.5 h-2.5 text-mint-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                              <path d="M20 6L9 17l-5-5" />
+                            </svg>
+                          </span>
+                          <span className="text-xs font-mono font-medium">{check.type}</span>
+                        </div>
+                        <span className="text-xs font-bold text-mint-500">{check.count}</span>
+                      </div>
+                      <p className="text-[10px] text-[var(--muted-foreground)] mt-1 ml-6">{check.what}</p>
+                      <div className="mt-1.5 ml-6 flex flex-wrap gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {check.examples.map((ex) => (
+                          <span key={ex} className="text-[9px] px-1.5 py-0.5 rounded bg-mint-500/10 text-mint-400 font-mono">{ex}</span>
+                        ))}
+                      </div>
                     </motion.div>
                   ))}
                 </div>

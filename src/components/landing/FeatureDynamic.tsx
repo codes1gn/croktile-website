@@ -211,7 +211,7 @@ export function FeatureDynamic() {
                 <p className="text-xs text-red-500 dark:text-red-400 font-medium">
                   {competitorProblems[activeProblem].problem}
                 </p>
-                <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-3 font-mono text-xs overflow-x-auto opacity-70">
+                <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-3 font-mono text-xs overflow-x-auto">
                   <HighlightedCode
                     code={competitorProblems[activeProblem].code}
                     lang={competitorProblems[activeProblem].framework === "CUDA" ? "cpp" : "python"}
