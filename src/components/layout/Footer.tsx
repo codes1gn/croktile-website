@@ -25,7 +25,7 @@ export function Footer() {
     {
       title: t("community"),
       links: [
-        { label: t("github"), href: "https://github.com/croktile", external: true },
+        { label: t("github"), href: "https://github.com/codes1gn/croktile", external: true },
       ],
     },
   ];
@@ -35,9 +35,14 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           <div className="col-span-2 md:col-span-1">
-            <Link href="/" className="inline-block">
-              <span className="text-xl font-bold">
-                <span className="text-mint-500">crok</span>tile
+            <Link href="/" className="flex items-center gap-2.5">
+              <img
+                src="/logo-mascot.png"
+                alt="Croktile"
+                className="h-8 w-auto rounded-md"
+              />
+              <span className="text-lg font-bold tracking-tight">
+                <span className="text-mint-500">Crok</span>Tile
               </span>
             </Link>
             <p className="mt-3 text-sm text-[var(--muted-foreground)] max-w-xs">

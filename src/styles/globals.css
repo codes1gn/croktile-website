@@ -51,6 +51,10 @@
     color: var(--foreground);
     font-family: var(--font-sans);
   }
+
+  ::selection {
+    background: color-mix(in srgb, var(--color-mint-400) 30%, transparent);
+  }
 }
 
 @layer utilities {
@@ -62,7 +66,7 @@
   }
 
   .bg-grid {
-    background-image: 
+    background-image:
       linear-gradient(to right, var(--border) 1px, transparent 1px),
       linear-gradient(to bottom, var(--border) 1px, transparent 1px);
     background-size: 64px 64px;
@@ -74,5 +78,44 @@
       color-mix(in srgb, var(--color-mint-400) 8%, transparent),
       transparent 40%
     );
+  }
+}
+
+@keyframes cursor-blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in {
+  from { opacity: 0; transform: translateX(-12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes progress-fill {
+  from { width: 0%; }
+}
+
+.animate-cursor-blink {
+  animation: cursor-blink 1s step-end infinite;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s ease-out both;
+}
+
+.animate-slide-in {
+  animation: slide-in 0.4s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-cursor-blink,
+  .animate-fade-in-up,
+  .animate-slide-in {
+    animation: none;
   }
 }
