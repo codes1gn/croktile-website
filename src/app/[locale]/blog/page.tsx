@@ -1,9 +1,12 @@
-import { getLocale } from "next-intl/server";
 import { getAllContent } from "@/lib/mdx";
 import { Link } from "@/i18n/routing";
 
-export default async function BlogListPage() {
-  const locale = await getLocale();
+type Props = {
+  params: Promise<{ locale: string }>;
+};
+
+export default async function BlogListPage({ params }: Props) {
+  const { locale } = await params;
   const posts = getAllContent("blog", locale);
 
   return (

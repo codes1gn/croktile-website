@@ -1,21 +1,23 @@
-import { getLocale } from "next-intl/server";
-import { serialize } from "next-mdx-remote/serialize";
-import { getContentBySlug } from "@/lib/mdx";
+import { getContentBySlug, getContentSlugs } from "@/lib/mdx";
 import { MdxContent } from "@/components/mdx/MdxContent";
 import { notFound } from "next/navigation";
+import { locales } from "@/i18n/config";
+
+export function generateStaticParams() {
+  return locales.flatMap((locale) =>
+    getContentSlugs("blog", locale).map((slug) => ({ locale, slug }))
+  );
+}
 
 type Props = {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 };
 
 export default async function BlogPostPage({ params }: Props) {
-  const { slug } = await params;
-  const locale = await getLocale();
+  const { locale, slug } = await params;
   const content = getContentBySlug("blog", slug, locale);
 
   if (!content) notFound();
-
-  const mdxSource = await serialize(content.content);
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -59,7 +61,7 @@ export default async function BlogPostPage({ params }: Props) {
             </div>
           )}
         </div>
-        <MdxContent source={mdxSource} />
+        <MdxContent source={content.content} />
       </article>
     </div>
   );

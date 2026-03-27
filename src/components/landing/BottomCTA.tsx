@@ -27,7 +27,7 @@ export function BottomCTA() {
             className="mx-auto h-28 w-auto mb-8 rounded-xl"
           />
           <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight">
-            Try <span className="text-gradient">CrokTile</span> today.
+            Try <span className="text-gradient">Croktile</span> today.
           </h2>
           <p className="mt-4 text-lg text-[var(--muted-foreground)] max-w-xl mx-auto">
             {t("subtitle")}

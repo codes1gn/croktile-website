@@ -68,7 +68,7 @@ export function FeatureDynamic() {
       }
       title={t("title")}
       subtitle={t("subtitle")}
-      description={t("description")}
+      descBullets={[t("desc1"), t("desc2"), t("desc3"), t("desc4")]}
     >
       <div className="space-y-5">
         <div className="space-y-2">
@@ -92,12 +92,12 @@ export function FeatureDynamic() {
                 Pick a shape — derived dims update automatically
               </span>
             </div>
-            <div className="grid grid-cols-4 gap-0 border-b">
+            <div className="flex flex-wrap border-b">
               {shapes.map((s, i) => (
                 <button
                   key={s.label}
                   onClick={() => setActiveShape(i)}
-                  className={`py-2.5 px-2 text-center text-xs font-medium transition-all border-r last:border-r-0 ${
+                  className={`flex-1 min-w-[5rem] py-2.5 px-3 text-center text-xs font-medium transition-all border-r last:border-r-0 ${
                     activeShape === i
                       ? "bg-mint-500/10 text-mint-500"
                       : "hover:bg-[var(--muted)] text-[var(--muted-foreground)]"

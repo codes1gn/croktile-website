@@ -40,7 +40,7 @@ export function FeatureSafety() {
       }
       title={t("title")}
       subtitle={t("subtitle")}
-      description={t("description")}
+      descBullets={[t("desc1"), t("desc2"), t("desc3"), t("desc4")]}
       reversed
     >
       <div className="space-y-5">
@@ -123,7 +123,7 @@ export function FeatureSafety() {
                           <span className="text-xs font-bold text-red-500 w-8 text-right">{check.count}</span>
                         </div>
                       </div>
-                      <div className="mt-1 flex flex-wrap gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                      <div className="mt-1 flex flex-wrap gap-1 opacity-40 group-hover:opacity-100 transition-opacity">
                         {check.examples.map((ex) => (
                           <span key={ex} className="text-[9px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 font-mono">{ex}</span>
                         ))}
@@ -146,9 +146,9 @@ export function FeatureSafety() {
                       />
                     ))}
                   </div>
-                  <div className="flex gap-1 mt-1">
+                  <div className="flex gap-1 mt-3">
                     {compileChecks.map((check) => (
-                      <span key={check.module} className="flex-1 text-[8px] text-center text-[var(--muted-foreground)] truncate">
+                      <span key={check.module} className="flex-1 text-[10px] text-center text-[var(--muted-foreground)] truncate origin-top-left rotate-[-45deg] translate-y-1">
                         {check.module.replace(".cpp", "")}
                       </span>
                     ))}
@@ -191,7 +191,7 @@ export function FeatureSafety() {
                         <span className="text-xs font-bold text-mint-500">{check.count}</span>
                       </div>
                       <p className="text-[10px] text-[var(--muted-foreground)] mt-1 ml-6">{check.what}</p>
-                      <div className="mt-1.5 ml-6 flex flex-wrap gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                      <div className="mt-1.5 ml-6 flex flex-wrap gap-1 opacity-40 group-hover:opacity-100 transition-opacity">
                         {check.examples.map((ex) => (
                           <span key={ex} className="text-[9px] px-1.5 py-0.5 rounded bg-mint-500/10 text-mint-400 font-mono">{ex}</span>
                         ))}

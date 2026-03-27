@@ -1,16 +1,24 @@
-import { getLocale } from "next-intl/server";
-import { serialize } from "next-mdx-remote/serialize";
-import { getContentBySlug, getSidebarItems } from "@/lib/mdx";
+import { getContentBySlug, getContentSlugs, getSidebarItems } from "@/lib/mdx";
 import { MdxContent } from "@/components/mdx/MdxContent";
 import { Sidebar } from "@/components/mdx/Sidebar";
+import { locales } from "@/i18n/config";
+
+export function generateStaticParams() {
+  return locales.flatMap((locale) => {
+    const slugs = getContentSlugs("tutorials", locale);
+    return [
+      { locale, slug: [] },
+      ...slugs.map((s) => ({ locale, slug: [s] })),
+    ];
+  });
+}
 
 type Props = {
-  params: Promise<{ slug?: string[] }>;
+  params: Promise<{ locale: string; slug?: string[] }>;
 };
 
 export default async function TutorialsPage({ params }: Props) {
-  const { slug } = await params;
-  const locale = await getLocale();
+  const { locale, slug } = await params;
   const currentSlug = slug?.[0] ?? "index";
   const sidebarItems = getSidebarItems("tutorials", locale);
   const content = getContentBySlug("tutorials", currentSlug, locale);
@@ -44,8 +52,6 @@ export default async function TutorialsPage({ params }: Props) {
     );
   }
 
-  const mdxSource = await serialize(content.content);
-
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="flex gap-12">
@@ -57,7 +63,7 @@ export default async function TutorialsPage({ params }: Props) {
               {content.meta.description}
             </p>
           )}
-          <MdxContent source={mdxSource} />
+          <MdxContent source={content.content} />
         </article>
       </div>
     </div>

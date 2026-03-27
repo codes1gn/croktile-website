@@ -2,6 +2,8 @@ import type { MetadataRoute } from "next";
 import { getContentSlugs } from "@/lib/mdx";
 import { locales } from "@/i18n/config";
 
+export const dynamic = "force-static";
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://croktile.io";
 

@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
+import { usePathname } from "next/navigation";
 import { ThemeToggle } from "./ThemeToggle";
 import { LangSwitch } from "./LangSwitch";
 import { useEffect, useState } from "react";
@@ -16,8 +17,15 @@ const navLinks = [
 
 export function Navbar() {
   const t = useTranslations("nav");
+  const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+
+  const isActive = (href: string) => {
+    const stripped = pathname.replace(/^\/(en|cn)/, "") || "/";
+    if (href === "/") return stripped === "/";
+    return stripped.startsWith(href);
+  };
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
@@ -52,9 +60,11 @@ export function Navbar() {
               <Link
                 key={labelKey}
                 href={href}
-                className="px-3 py-2 text-sm font-medium text-[var(--muted-foreground)]
-                           hover:text-[var(--foreground)] transition-colors rounded-lg
-                           hover:bg-[var(--muted)]"
+                className={`px-3 py-2 text-sm font-medium transition-colors rounded-lg ${
+                  isActive(href)
+                    ? "text-mint-500 bg-mint-500/10"
+                    : "text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)]"
+                }`}
               >
                 {t(labelKey)}
               </Link>
@@ -99,9 +109,11 @@ export function Navbar() {
               <Link
                 key={labelKey}
                 href={href}
-                className="block px-3 py-2 text-sm font-medium text-[var(--muted-foreground)]
-                           hover:text-[var(--foreground)] hover:bg-[var(--muted)] rounded-lg
-                           transition-colors"
+                className={`block px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  isActive(href)
+                    ? "text-mint-500 bg-mint-500/10"
+                    : "text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)]"
+                }`}
                 onClick={() => setMobileOpen(false)}
               >
                 {t(labelKey)}

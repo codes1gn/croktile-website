@@ -1,13 +1,18 @@
 import type { ReactNode } from "react";
 import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages } from "next-intl/server";
+import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
+import { locales } from "@/i18n/config";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import "@/styles/globals.css";
+
+export function generateStaticParams() {
+  return locales.map((locale) => ({ locale }));
+}
 
 export const viewport: Viewport = {
   themeColor: [
@@ -20,16 +25,18 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: "Croktile — The TileFlow Language for GPU Programming",
+    default: "Croktile — The Next-Gen GPU & DSA Language. 5x Productivity.",
     template: "%s | Croktile",
   },
   description:
-    "Write less code. Catch more bugs. Ship faster GPU kernels with Croktile's TileFlow programming paradigm.",
+    "Croktile is the next-gen GPU & DSA programming language that achieves 5x productivity over CUDA with zero-cost abstractions.",
   metadataBase: new URL("https://croktile.io"),
   keywords: [
     "croktile",
     "tileflow",
     "GPU programming",
+    "DSA programming",
+    "domain-specific accelerator",
     "CUDA",
     "DSL",
     "C++ EDSL",
@@ -43,26 +50,26 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "Croktile",
-    title: "Croktile — The TileFlow Language for GPU Programming",
+    title: "Croktile — The Next-Gen GPU & DSA Language. 5x Productivity.",
     description:
-      "Write less code. Catch more bugs. Ship faster GPU kernels.",
+      "The next-gen GPU & DSA language. 5x productivity over CUDA with zero-cost abstractions.",
     url: "https://croktile.io",
     locale: "en_US",
     images: [
       {
-        url: "/og-image.png",
+        url: "/logo-mascot.png",
         width: 1200,
         height: 630,
-        alt: "Croktile — The TileFlow Language for GPU Programming",
+        alt: "Croktile — The Next-Gen GPU & DSA Language. 5x Productivity.",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Croktile — The TileFlow Language for GPU Programming",
+    title: "Croktile — The Next-Gen GPU & DSA Language. 5x Productivity.",
     description:
-      "Write less code. Catch more bugs. Ship faster GPU kernels.",
-    images: ["/og-image.png"],
+      "The next-gen GPU & DSA language. 5x productivity over CUDA with zero-cost abstractions.",
+    images: ["/logo-mascot.png"],
   },
   robots: {
     index: true,
@@ -85,6 +92,7 @@ export default async function LocaleLayout({ children, params }: Props) {
     notFound();
   }
 
+  setRequestLocale(locale);
   const messages = await getMessages();
 
   return (

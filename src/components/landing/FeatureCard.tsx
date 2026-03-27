@@ -7,7 +7,8 @@ type Props = {
   icon: ReactNode;
   title: string;
   subtitle: string;
-  description: string;
+  description?: string;
+  descBullets?: string[];
   children?: ReactNode;
   reversed?: boolean;
 };
@@ -17,6 +18,7 @@ export function FeatureCard({
   title,
   subtitle,
   description,
+  descBullets,
   children,
   reversed = false,
 }: Props) {
@@ -37,9 +39,20 @@ export function FeatureCard({
               <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
                 {title}
               </h2>
-              <p className="text-lg text-[var(--muted-foreground)] leading-relaxed">
-                {description}
-              </p>
+              {descBullets && descBullets.length > 0 ? (
+                <ul className="space-y-2">
+                  {descBullets.map((bullet, i) => (
+                    <li key={i} className="flex items-start gap-2.5 text-base text-[var(--muted-foreground)] leading-relaxed">
+                      <span className="w-1.5 h-1.5 rounded-full bg-mint-500 shrink-0 mt-2.5" />
+                      {bullet}
+                    </li>
+                  ))}
+                </ul>
+              ) : description ? (
+                <p className="text-lg text-[var(--muted-foreground)] leading-relaxed">
+                  {description}
+                </p>
+              ) : null}
             </ScrollReveal>
           </div>
           <div className="flex-1 w-full max-w-xl">

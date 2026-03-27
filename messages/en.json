@@ -9,7 +9,7 @@
     "github": "GitHub"
   },
   "hero": {
-    "tagline": "The TileFlow Language for GPU Programming",
+    "tagline": "The Next-Gen GPU & DSA Language Achieves 5x Productivity",
     "subtitle": "Write less code. Catch more bugs. Ship faster GPU kernels.",
     "cta": "Get Started",
     "learnMore": "Learn More"
@@ -18,7 +18,10 @@
     "easyToUse": {
       "title": "Easy to Use",
       "subtitle": "Start with less, achieve more",
-      "description": "40% of equivalent CUDA code. Zero-cost high-level abstractions higher than Triton. Work on tensors, not buffers.",
+      "desc1": "Achieve extreme performance with zero-cost abstractions",
+      "desc2": "The most intuitive GPU & DSA programming language among all competitors",
+      "desc3": "40% of equivalent CUDA code — higher abstraction than Triton",
+      "desc4": "Work on tensors and tiles, not raw buffers and pointers",
       "point1": "Work on tensors rather than raw buffers",
       "point2": "Avoid the complexity of HW programming — TMA, DMA, tensor-core",
       "point3": "Make parallel programs easier to write and reason about",
@@ -27,7 +30,10 @@
     "safety": {
       "title": "Compile-Time Safety",
       "subtitle": "Catch bugs before they run",
-      "description": "Strong compile-time code safety checks address tiling mismatches and avoid hard-to-debug issues in low-level CUDA kernel programming.",
+      "desc1": "353 compile-time diagnostic checks across 7 compiler modules",
+      "desc2": "Catch tiling mismatches, shape errors, and DMA bugs before they run",
+      "desc3": "1,319 runtime assertions guard every kernel in production",
+      "desc4": "Eliminate entire classes of bugs that plague CUDA development",
       "point1": "Detect tiling mismatches at compile time",
       "point2": "Enable aggressive runtime checks for easier debugging",
       "point3": "Eliminate entire classes of DMA-related bugs"
@@ -35,7 +41,10 @@
     "dynamic": {
       "title": "Dynamic Shapes",
       "subtitle": "Symbolic dimensions, zero boilerplate",
-      "description": "First system to allow shared (scratchpad) memory to be dynamic in low-level CUDA kernel programming. Static and runtime memory support.",
+      "desc1": "First-ever dynamic shared memory for GPU & DSA kernel programming",
+      "desc2": "Symbolic dimensions — write once, run on any shape",
+      "desc3": "Derived dimensions auto-computed: PACKED_K, META_COLS, grid, SMEM",
+      "desc4": "No template metaprogramming, no recompilation per shape",
       "point1": "First-class symbolic dimension support",
       "point2": "Dynamic shared memory without boilerplate",
       "point3": "Static and runtime memory support unified"
@@ -43,7 +52,10 @@
     "ai": {
       "title": "Born for AI Tuning",
       "subtitle": "Language meets machine intelligence",
-      "description": "Compact syntax and short LoC create great context for AI. Highly optimized compiler messages let AI easily understand and iterate.",
+      "desc1": "Language designed from scratch for AI-assisted optimization",
+      "desc2": "Compact syntax keeps entire kernels inside AI context windows",
+      "desc3": "AI achieved 1127 TFLOPS from 671 baseline in a single session",
+      "desc4": "Well-documented CLI and structured errors for autonomous agents",
       "point1": "Compact syntax perfect for AI context windows",
       "point2": "Hidden error-prone configs behind simple primitives",
       "point3": "CLI tools and arguments well-documented for AI agents",

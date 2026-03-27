@@ -1,10 +1,12 @@
-import { getLocale } from "next-intl/server";
-import { serialize } from "next-mdx-remote/serialize";
 import { getAllContent } from "@/lib/mdx";
 import { MdxContent } from "@/components/mdx/MdxContent";
 
-export default async function ChangelogPage() {
-  const locale = await getLocale();
+type Props = {
+  params: Promise<{ locale: string }>;
+};
+
+export default async function ChangelogPage({ params }: Props) {
+  const { locale } = await params;
   const entries = getAllContent("changelog", locale);
 
   return (
@@ -22,9 +24,7 @@ export default async function ChangelogPage() {
         <div className="relative">
           <div className="absolute left-[7px] top-2 bottom-2 w-px bg-[var(--border)]" />
           <div className="space-y-12">
-            {entries.map(async (entry) => {
-              const mdxSource = await serialize(entry.content);
-              return (
+            {entries.map((entry) => (
                 <div key={entry.meta.slug} className="relative pl-8">
                   <div className="absolute left-0 top-1.5 w-4 h-4 rounded-full border-2 border-mint-500 bg-[var(--background)]" />
                   <div className="text-sm text-[var(--muted-foreground)] mb-1">
@@ -38,10 +38,9 @@ export default async function ChangelogPage() {
                   <h2 className="text-xl font-semibold mb-3">
                     {entry.meta.title}
                   </h2>
-                  <MdxContent source={mdxSource} />
+                  <MdxContent source={entry.content} />
                 </div>
-              );
-            })}
+            ))}
           </div>
         </div>
       )}

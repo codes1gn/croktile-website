@@ -1,6 +1,4 @@
-"use client";
-
-import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
+import { MDXRemote } from "next-mdx-remote/rsc";
 
 const mdxComponents = {
   h1: (props: any) => (
@@ -70,13 +68,20 @@ const mdxComponents = {
 };
 
 type Props = {
-  source: MDXRemoteSerializeResult;
+  source: string;
 };
 
 export function MdxContent({ source }: Props) {
   return (
     <div className="prose-custom max-w-none">
-      <MDXRemote {...source} components={mdxComponents} />
+      <MDXRemote
+        source={source}
+        components={mdxComponents}
+        options={{
+          parseFrontmatter: true,
+          mdxOptions: { format: "md" },
+        }}
+      />
     </div>
   );
 }

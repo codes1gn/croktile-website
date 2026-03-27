@@ -34,7 +34,7 @@ export function HomeChangelog({ entries }: Props) {
           {entries.slice(0, 4).map((entry, i) => (
             <ScrollReveal key={entry.slug} delay={i * 0.08}>
               <Link
-                href={`/changelog`}
+                href={`/changelog/${entry.slug}`}
                 className="group flex items-center gap-4 p-4 rounded-xl border
                            hover:border-mint-500/50 hover:bg-[var(--muted)] transition-all"
               >

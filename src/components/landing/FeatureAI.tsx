@@ -103,7 +103,7 @@ export function FeatureAI() {
       }
       title={t("title")}
       subtitle={t("subtitle")}
-      description={t("description")}
+      descBullets={[t("desc1"), t("desc2"), t("desc3"), t("desc4")]}
       reversed
     >
       <div className="space-y-5">
@@ -224,7 +224,7 @@ export function FeatureAI() {
                                 {row.type}
                               </span>
                             </td>
-                            <td className="px-3 py-2 text-[var(--muted-foreground)] max-w-[200px] truncate">{row.opt}</td>
+                            <td className="px-3 py-2 text-[var(--muted-foreground)] max-w-[200px] truncate" title={row.opt}>{row.opt}</td>
                           </motion.tr>
                         ))}
                       </tbody>

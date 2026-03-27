@@ -1,4 +1,3 @@
-import { getLocale } from "next-intl/server";
 import { getAllContent } from "@/lib/mdx";
 import {
   Hero,
@@ -11,8 +10,12 @@ import {
   HomeBlog,
 } from "@/components/landing";
 
-export default async function HomePage() {
-  const locale = await getLocale();
+type Props = {
+  params: Promise<{ locale: string }>;
+};
+
+export default async function HomePage({ params }: Props) {
+  const { locale } = await params;
 
   const changelogEntries = getAllContent("changelog", locale).map((e) => ({
     title: e.meta.title,
