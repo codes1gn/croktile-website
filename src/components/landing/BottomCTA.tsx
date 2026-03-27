@@ -6,9 +6,9 @@ import { Link } from "@/i18n/routing";
 import { ScrollReveal } from "./ScrollReveal";
 
 const metrics = [
-  { value: "40%", label: "less code than CUDA" },
-  { value: "4", label: "compile-time safety checks" },
-  { value: "0", label: "vendor lock-in" },
+  { value: "62%", label: "less code than CUDA+CuTe" },
+  { value: "353", label: "compile-time checks" },
+  { value: "1128", label: "peak TFLOPS (FP8)" },
 ];
 
 export function BottomCTA() {

@@ -51,114 +51,209 @@ const comparisons = [
 }`,
     highlight: true,
     lang: "choreo",
+    source: "",
+  },
+  {
+    label: "Triton",
+    lines: 49,
+    file: "09-persistent-matmul.py",
+    code: `@triton.jit
+def matmul_kernel_persistent(
+    a_ptr, b_ptr, c_ptr,
+    M, N, K,
+    stride_am, stride_ak,
+    stride_bk, stride_bn,
+    stride_cm, stride_cn,
+    BLOCK_SIZE_M: tl.constexpr,
+    BLOCK_SIZE_N: tl.constexpr,
+    BLOCK_SIZE_K: tl.constexpr,
+    GROUP_SIZE_M: tl.constexpr,
+    NUM_SMS: tl.constexpr):
+  start_pid = tl.program_id(axis=0)
+  num_pid_m = tl.cdiv(M, BLOCK_SIZE_M)
+  num_pid_n = tl.cdiv(N, BLOCK_SIZE_N)
+  k_tiles = tl.cdiv(K, BLOCK_SIZE_K)
+  num_tiles = num_pid_m * num_pid_n
+
+  tile_id_c = start_pid - NUM_SMS
+  num_pid_in_group = GROUP_SIZE_M * num_pid_n
+  offs_k_for_mask = tl.arange(0, BLOCK_SIZE_K)
+
+  for tile_id in tl.range(start_pid, num_tiles,
+                          NUM_SMS, flatten=True):
+    pid_m, pid_n = _compute_pid(
+      tile_id, num_pid_in_group,
+      num_pid_m, GROUP_SIZE_M, NUM_SMS)
+    start_m = pid_m * BLOCK_SIZE_M
+    start_n = pid_n * BLOCK_SIZE_N
+    offs_am = start_m + tl.arange(0, BLOCK_SIZE_M)
+    offs_bn = start_n + tl.arange(0, BLOCK_SIZE_N)
+    offs_am = tl.max_contiguous(
+      tl.multiple_of(offs_am, BLOCK_SIZE_M),
+      BLOCK_SIZE_M)
+    offs_bn = tl.max_contiguous(
+      tl.multiple_of(offs_bn, BLOCK_SIZE_N),
+      BLOCK_SIZE_N)
+
+    accumulator = tl.zeros(
+      (BLOCK_SIZE_M, BLOCK_SIZE_N), dtype=tl.float32)
+    for ki in range(k_tiles):
+      offs_k = ki * BLOCK_SIZE_K + offs_k_for_mask
+      a = tl.load(a_ptr + offs_am[:, None] * stride_am
+                   + offs_k[None, :] * stride_ak,
+                   mask=offs_k_for_mask[None, :]
+                        < K - ki * BLOCK_SIZE_K)
+      b = tl.load(b_ptr + offs_k[:, None] * stride_bk
+                   + offs_bn[None, :] * stride_bn,
+                   mask=offs_k_for_mask[:, None]
+                        < K - ki * BLOCK_SIZE_K)
+      accumulator = tl.dot(a, b, accumulator)
+    # ... epilogue: compute output pid, store`,
+    highlight: false,
+    lang: "python",
+    source: "triton-lang.org/tutorials/09-persistent-matmul",
+  },
+  {
+    label: "CUTLASS (CuTeDSL)",
+    lines: 110,
+    file: "persistent_gemm_hopper.py",
+    code: `class PersistentGemm:
+  def __init__(self):
+    self.bM, self.bN, self.bK = 128, 256, 64
+    self.num_consumer = 2
+    self.num_producer = 1
+    self.atom_layout_mnk = (2, 1, 1)
+    self.acc_dtype = cutlass.Float32
+    self.op = cute.nvgpu.cpasync \
+      .CopyBulkTensorTileG2SOp()
+    self.stage = 4
+
+  def __call__(self, ...):
+    tiled_mma = sm90_utils \
+      .make_trivial_tiled_mma(
+        mA.element_type, mB.element_type,
+        OperandMajorMode.K, OperandMajorMode.K,
+        self.acc_dtype, self.atom_layout_mnk,
+        tiler_mn=(64, self.bN))
+
+    tma_atom_a, tma_tensor_a = \
+      cute.nvgpu.cpasync.make_tiled_tma_atom(
+        self.op, mA, smem_layout,
+        (self.bM, self.bK), num_multicast=1)
+    tma_atom_b, tma_tensor_b = \
+      cute.nvgpu.cpasync.make_tiled_tma_atom(
+        self.op, mB, smem_layout,
+        (self.bN, self.bK), num_multicast=1)
+
+    tile_sched_params, grid = \
+      self._compute_grid(M, N, self.bM, self.bN)
+
+  @cute.kernel
+  def kernel(self, ...):
+    # Producer: warp group 0
+    if warp_group_idx < 1:
+      cute.arch.warpgroup_reg_dealloc(24)
+      tile_sched = cutlass.utils \
+        .StaticPersistentTileScheduler.create(
+          tile_sched_params,
+          cute.arch.block_idx(),
+          cute.arch.grid_dim())
+      work_tile = tile_sched \
+        .initial_work_tile_info()
+      while work_tile.is_valid_tile:
+        tile_m, tile_n, _ = work_tile.tile_idx
+        for tile_k in cutlass.range(k_tile_cnt):
+          mainloop_pipeline.producer_acquire(
+            mainloop_producer_state)
+          cute.copy(tma_atom_a, tAgA_k, tAsA_pipe,
+            tma_bar_ptr=mainloop_pipeline
+              .producer_get_barrier(
+                mainloop_producer_state),
+            mcast_mask=0)
+          # ... same for B
+          mainloop_pipeline.producer_commit(
+            mainloop_producer_state)
+        tile_sched.advance_to_next_work()
+    # Consumer: warp groups 1-2
+    else:
+      cute.arch.warpgroup_reg_alloc(240)
+      # ... consume tiles with WGMMA`,
+    highlight: false,
+    lang: "python",
+    source: "veitner.bearblog.dev/persistent-gemm-in-cutedsl-on-hopper",
   },
   {
     label: "CUDA + CuTe",
     lines: 95,
-    file: "matmul_hilbert.cu",
-    code: `template <int BM, int BN, int BK>
-__global__ void persistent_hilbert_gemm(
-    half* A, half* B, half* C,
-    int M, int N, int K,
-    int* sched_m, int* sched_n,
-    int total_tiles) {
-  __shared__ half smA[BM][BK], smB[BN][BK];
-  int sm_id = blockIdx.x;
-  int warpId = threadIdx.x / 32;
+    file: "persistent_gemm_sm90.cu",
+    code: `using namespace cute;
+using namespace cutlass;
 
-  for (int tile = sm_id; tile < total_tiles;
-       tile += gridDim.x) {
-    int bm = sched_m[tile], bn = sched_n[tile];
-    // TMA descriptor setup (20+ lines)
-    CUtensorMap tmA, tmB;
-    cuTensorMapEncodeTiled(&tmA, ...);
-    cuTensorMapEncodeTiled(&tmB, ...);
+template <class TileShape, class ClusterShape>
+struct PersistentGemmKernel {
+  using MainloopPipeline =
+    typename cutlass::PipelineTmaAsync<Stages>;
+  using PipelineState =
+    typename MainloopPipeline::PipelineState;
 
-    // Shared memory barriers
-    __shared__ uint64_t full_bar, empty_bar;
-    asm volatile("mbarrier.init ...");
-    // async TMA loads (per-stage)
-    asm volatile("cp.async.bulk.tensor ...");
-    asm volatile("mbarrier.arrive ...");
-    // wait + WGMMA
-    asm volatile("mbarrier.try_wait ...");
-    asm volatile("wgmma.mma_async ...");
-    // store + epilogue
-    asm volatile("stmatrix.sync.aligned ...");
-    // copy back to global
-    asm volatile("cp.async.bulk.tensor ...");
+  __device__ void operator()(Params const& params) {
+    // Warp specialization: producer vs consumer
+    int warp_group_idx = canonical_warp_group_idx();
+    SharedStorage& storage =
+      *reinterpret_cast<SharedStorage*>(
+        cute::declare_smem<char, SharedSize>());
+
+    PersistentTileSchedulerSm90 scheduler(
+      params.scheduler, blockIdx, gridDim);
+
+    if (warp_group_idx == 0) {
+      // Producer: TMA loads A,B → SMEM
+      auto work = scheduler.initial_work_tile_info();
+      while (work.is_valid_tile) {
+        for (int k = 0; k < k_tiles; ++k) {
+          pipeline.producer_acquire(state);
+          auto [tAgA, tAsA] = tma_partition_A(
+            tma_a, work.M_idx, k);
+          auto [tBgB, tBsB] = tma_partition_B(
+            tma_b, work.N_idx, k);
+          copy(tma_a, tAgA, tAsA);
+          copy(tma_b, tBgB, tBsB);
+          pipeline.producer_commit(state);
+          ++state;
+        }
+        scheduler.advance_to_next_work();
+        work = scheduler.get_current_work();
+      }
+    } else {
+      // Consumer: WGMMA accumulate
+      auto work = scheduler.initial_work_tile_info();
+      auto accum = partition_fragment_C(
+        tiled_mma, take<0,2>(TileShape{}));
+      while (work.is_valid_tile) {
+        clear(accum);
+        for (int k = 0; k < k_tiles; ++k) {
+          pipeline.consumer_wait(cstate);
+          warpgroup_arrive();
+          gemm(tiled_mma, accum,
+               tCsA(_, _, _, cstate.index()),
+               tCsB(_, _, _, cstate.index()),
+               accum);
+          warpgroup_commit_batch();
+          warpgroup_wait<0>();
+          pipeline.consumer_release(cstate);
+          ++cstate;
+        }
+        // Epilogue: store accum → GMEM
+        epilogue(accum, work.M_idx, work.N_idx);
+        scheduler.advance_to_next_work();
+        work = scheduler.get_current_work();
+      }
+    }
   }
-}`,
+};`,
     highlight: false,
     lang: "cpp",
-  },
-  {
-    label: "Triton",
-    lines: 52,
-    file: "matmul_persistent.py",
-    code: `@triton.jit
-def persistent_hilbert_gemm(
-    a_ptr, b_ptr, c_ptr,
-    M, N, K,
-    sched_m_ptr, sched_n_ptr,
-    total_tiles,
-    BLOCK_M: tl.constexpr,
-    BLOCK_N: tl.constexpr,
-    BLOCK_K: tl.constexpr):
-  pid = tl.program_id(0)
-  num_sms = tl.num_programs(0)
-  for tile in range(pid, total_tiles, num_sms):
-    bm = tl.load(sched_m_ptr + tile)
-    bn = tl.load(sched_n_ptr + tile)
-    offs_m = bm * BLOCK_M + tl.arange(0, BLOCK_M)
-    offs_n = bn * BLOCK_N + tl.arange(0, BLOCK_N)
-    acc = tl.zeros([BLOCK_M, BLOCK_N], tl.float32)
-    for k in range(0, K, BLOCK_K):
-      offs_k = k + tl.arange(0, BLOCK_K)
-      a = tl.load(a_ptr + offs_m[:, None] * K
-                  + offs_k[None, :],
-                  mask=offs_m[:, None] < M)
-      b = tl.load(b_ptr + offs_n[:, None] * K
-                  + offs_k[None, :],
-                  mask=offs_n[:, None] < N)
-      acc += tl.dot(a, b.T)
-    c = acc.to(tl.float16)
-    tl.store(c_ptr + offs_m[:, None] * N
-             + offs_n[None, :], c,
-             mask=(offs_m[:, None] < M)
-                  & (offs_n[None, :] < N))`,
-    highlight: false,
-    lang: "python",
-  },
-  {
-    label: "Helion",
-    lines: 40,
-    file: "matmul_persistent.py",
-    code: `@helion.kernel
-def persistent_hilbert_matmul(
-    a: torch.Tensor,
-    b: torch.Tensor,
-    sched_m: torch.Tensor,
-    sched_n: torch.Tensor,
-) -> torch.Tensor:
-  M, K = a.shape
-  N, _ = b.shape
-  total = sched_m.shape[0]
-  out = torch.empty([M, N], dtype=a.dtype,
-                    device=a.device)
-  for tile in hl.tile(total):
-    bm = sched_m[tile]  # Hilbert-ordered
-    bn = sched_n[tile]
-    tile_m = hl.tile(BLOCK_M) + bm * BLOCK_M
-    tile_n = hl.tile(BLOCK_N) + bn * BLOCK_N
-    acc = hl.zeros([BLOCK_M, BLOCK_N],
-                   dtype=torch.float32)
-    for tile_k in hl.tile(K, block_size=BLOCK_K):
-      acc += a[tile_m, tile_k] @ b[tile_n, tile_k].T
-    out[tile_m, tile_n] = acc.to(a.dtype)
-  return out`,
-    highlight: false,
-    lang: "python",
+    source: "NVIDIA/cutlass sm90_gemm_tma_warpspecialized_pingpong",
   },
 ];
 
@@ -247,6 +342,11 @@ export function FeatureEasyToUse() {
                 />
               </motion.div>
             </AnimatePresence>
+            {comparisons[activeCode].source && (
+              <div className="px-4 py-1.5 border-t text-[10px] text-[var(--muted-foreground)] font-mono truncate">
+                Source: {comparisons[activeCode].source}
+              </div>
+            )}
           </div>
         </ScrollReveal>
 
@@ -255,12 +355,12 @@ export function FeatureEasyToUse() {
           <div className="space-y-2 px-1">
             {comparisons.map((c, i) => (
               <div key={c.label} className="flex items-center gap-3">
-                <span className="text-xs text-[var(--muted-foreground)] w-20 text-right font-medium shrink-0">
+                <span className="text-xs text-[var(--muted-foreground)] w-28 text-right font-medium shrink-0">
                   {c.label}
                 </span>
                 <motion.div
                   initial={{ width: 0 }}
-                  whileInView={{ width: `${(c.lines / 95) * 100}%` }}
+                  whileInView={{ width: `${(c.lines / 110) * 100}%` }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.8, delay: 0.3 + i * 0.08 }}
                   className={`h-5 rounded flex items-center pl-2 ${
@@ -277,7 +377,7 @@ export function FeatureEasyToUse() {
             ))}
           </div>
           <p className="text-xs text-center text-[var(--muted-foreground)] mt-2">
-            Lines of code — persistent Hilbert-curve GEMM kernel
+            Lines of code — persistent warp-specialized GEMM kernel
           </p>
         </ScrollReveal>
       </div>

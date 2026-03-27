@@ -159,6 +159,7 @@ export function FeatureAI() {
         <ScrollReveal delay={0.25}>
           <button
             onClick={() => setShowResults(!showResults)}
+            aria-expanded={showResults}
             className="w-full py-2.5 px-4 rounded-lg text-sm font-medium border
                        hover:bg-[var(--muted)] transition-all text-left flex items-center justify-between"
           >

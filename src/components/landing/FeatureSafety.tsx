@@ -94,9 +94,9 @@ export function FeatureSafety() {
                 className="rounded-xl border overflow-hidden"
               >
                 <div className="px-4 py-2.5 border-b bg-[var(--muted)] flex items-center justify-between">
-                  <span className="text-xs font-medium text-[var(--muted-foreground)]">
-                    Compiler Error1() call sites across modules
-                  </span>
+              <span className="text-xs font-medium text-[var(--muted-foreground)]">
+                Compiler diagnostic checks across modules
+              </span>
                   <span className="text-xs text-red-500 font-mono font-bold">{totalCompileChecks}</span>
                 </div>
                 <div className="divide-y">
@@ -123,7 +123,7 @@ export function FeatureSafety() {
                           <span className="text-xs font-bold text-red-500 w-8 text-right">{check.count}</span>
                         </div>
                       </div>
-                      <div className="mt-1 flex flex-wrap gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="mt-1 flex flex-wrap gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                         {check.examples.map((ex) => (
                           <span key={ex} className="text-[9px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 font-mono">{ex}</span>
                         ))}
@@ -191,7 +191,7 @@ export function FeatureSafety() {
                         <span className="text-xs font-bold text-mint-500">{check.count}</span>
                       </div>
                       <p className="text-[10px] text-[var(--muted-foreground)] mt-1 ml-6">{check.what}</p>
-                      <div className="mt-1.5 ml-6 flex flex-wrap gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="mt-1.5 ml-6 flex flex-wrap gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                         {check.examples.map((ex) => (
                           <span key={ex} className="text-[9px] px-1.5 py-0.5 rounded bg-mint-500/10 text-mint-400 font-mono">{ex}</span>
                         ))}

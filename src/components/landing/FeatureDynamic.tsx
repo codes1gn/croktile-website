@@ -14,26 +14,6 @@ const shapes = [
   { m: 8192, k: 2048, n: 16384, wm: 64, wn: 256, tk: 64, label: "Rectangular" },
 ];
 
-const croktileSymbolic = `// One kernel handles ANY shape — M, N, K
-// are symbolic dimensions resolved at runtime.
-// Shared memory is sized dynamically from symbols.
-__co__ void spmm(
-    global f8_e4m3 [M, PACKED_K] lhs_packed,
-    global u8 [M, META_COLS] lhs_meta,
-    global f8_e4m3 [N, K] rhs,
-    global f16 [M, N] output) {
-  // PACKED_K = K/2 — compiler infers relationship
-  // META_COLS = K/8 — from sparsity metadata
-  parallel {block_m, block_n}
-    by [cdiv(M, WARP_M),
-        cdiv(N, WARP_N)] : block {
-    // shared memory sized from symbolic dims
-    shared f8_e4m3 [WARP_M, K/2] lhs_s;
-    shared f8_e4m3 [WARP_N, K] rhs_s;
-    // ...
-  }
-}`;
-
 const competitorProblems = [
   {
     framework: "CUDA",

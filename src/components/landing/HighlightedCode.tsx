@@ -1,6 +1,6 @@
 "use client";
 
-import { memo } from "react";
+import { memo, useEffect, useState } from "react";
 
 type Props = {
   code: string;
@@ -9,7 +9,7 @@ type Props = {
 
 type TokenType = "keyword" | "type" | "storage" | "function" | "string" | "comment" | "number" | "operator" | "punctuation" | "default";
 
-const COLORS: Record<TokenType, string> = {
+const DARK: Record<TokenType, string> = {
   keyword: "#ff7b72",
   type: "#79c0ff",
   storage: "#d2a8ff",
@@ -20,6 +20,19 @@ const COLORS: Record<TokenType, string> = {
   operator: "#ff7b72",
   punctuation: "#8b949e",
   default: "#e6edf3",
+};
+
+const LIGHT: Record<TokenType, string> = {
+  keyword: "#cf222e",
+  type: "#0550ae",
+  storage: "#8250df",
+  function: "#8250df",
+  string: "#0a3069",
+  comment: "#6e7781",
+  number: "#0550ae",
+  operator: "#cf222e",
+  punctuation: "#6e7781",
+  default: "#1f2328",
 };
 
 const CHOREO_KEYWORDS = new Set([
@@ -112,7 +125,14 @@ function tokenizeLine(line: string, lang: string): Array<{ text: string; type: T
       pos = end + 1;
       continue;
     }
-    if (line[pos] === "'" && !isPython) {
+    if (line[pos] === "'") {
+      if (isPython) {
+        const tripleMatch = line.slice(pos).match(/^('{3}|"{3})/);
+        if (tripleMatch) {
+          tokens.push({ text: line.slice(pos), type: "string" });
+          break;
+        }
+      }
       let end = pos + 1;
       while (end < line.length && line[end] !== "'") {
         if (line[end] === "\\") end++;
@@ -132,8 +152,17 @@ function tokenizeLine(line: string, lang: string): Array<{ text: string; type: T
       }
     }
 
-    if (/[a-zA-Z_@]/.test(line[pos])) {
-      const wordMatch = line.slice(pos).match(/^[a-zA-Z_@][a-zA-Z0-9_-]*/);
+    if (line[pos] === "@" && isPython) {
+      const decoMatch = line.slice(pos).match(/^@[a-zA-Z_][a-zA-Z0-9_.]*/);
+      if (decoMatch) {
+        tokens.push({ text: decoMatch[0], type: "function" });
+        pos += decoMatch[0].length;
+        continue;
+      }
+    }
+
+    if (/[a-zA-Z_]/.test(line[pos])) {
+      const wordMatch = line.slice(pos).match(/^[a-zA-Z_][a-zA-Z0-9_]*/);
       if (wordMatch) {
         const word = wordMatch[0];
         let type: TokenType = "default";
@@ -145,9 +174,7 @@ function tokenizeLine(line: string, lang: string): Array<{ text: string; type: T
           type = "storage";
         } else if (isChoreo && CHOREO_BUILTINS.has(word)) {
           type = "function";
-        } else if (isPython && /^(tl|hl|torch|triton|helion)$/.test(word)) {
-          type = "function";
-        } else if (isPython && word[0] === "@") {
+        } else if (isPython && /^(tl|hl|torch|triton|helion|cutlass|cute)$/.test(word)) {
           type = "function";
         } else if (!isChoreo && !isPython && C_KEYWORDS.has(word)) {
           type = "keyword";
@@ -169,7 +196,7 @@ function tokenizeLine(line: string, lang: string): Array<{ text: string; type: T
       if (methodMatch && isPython) {
         tokens.push({ text: ".", type: "punctuation" });
         const mName = methodMatch[0];
-        const mType: TokenType = /^(constexpr|program_id|num_programs|load|store|zeros|arange|dot|float16|float32|to)$/.test(mName) ? "function" : "default";
+        const mType: TokenType = /^(constexpr|program_id|num_programs|load|store|zeros|arange|dot|float16|float32|float8e4nv|to|cdiv|range|jit|autotune|Config|shape|stride|dtype|T|device|empty|matmul|synchronize|assert_close|get_device_properties)$/.test(mName) ? "function" : "default";
         tokens.push({ text: mName, type: mType });
         pos += 1 + mName.length;
         continue;
@@ -204,10 +231,24 @@ function tokenizeLine(line: string, lang: string): Array<{ text: string; type: T
   return tokens;
 }
 
+function useIsDark(): boolean {
+  const [isDark, setIsDark] = useState(true);
+  useEffect(() => {
+    const check = () => setIsDark(document.documentElement.classList.contains("dark"));
+    check();
+    const observer = new MutationObserver(check);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
+  return isDark;
+}
+
 export const HighlightedCode = memo(function HighlightedCode({
   code,
   lang = "choreo",
 }: Props) {
+  const isDark = useIsDark();
+  const palette = isDark ? DARK : LIGHT;
   const lines = code.split("\n");
 
   return (
@@ -216,7 +257,7 @@ export const HighlightedCode = memo(function HighlightedCode({
         {lines.map((line, lineIdx) => (
           <div key={lineIdx}>
             {tokenizeLine(line, lang).map((token, i) => (
-              <span key={i} style={{ color: COLORS[token.type] }}>
+              <span key={i} style={{ color: palette[token.type] }}>
                 {token.text}
               </span>
             ))}
