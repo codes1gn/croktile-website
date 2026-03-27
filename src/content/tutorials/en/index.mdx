@@ -1,42 +1,22 @@
 ---
-title: "Introduction to Croktile"
-description: "A beginner-friendly introduction to the Croktile TileFlow programming language."
-order: 1
+title: "Introduction to Croktile Tutorials"
+description: "Table of contents for the Croktile TileFlow tutorial series."
+order: 0
 ---
 
-## What is Croktile?
+Step-by-step tutorials for the Croktile tileflow language: shapes, data movement, parallelism, and host integration.
 
-Croktile is a C++ Embedded Domain Specific Language (EDSL) designed for TileFlow programming on GPUs. It simplifies the process of writing high-performance GPU kernels by providing high-level abstractions for data movement, tiling, and parallelism.
+## Tutorials
 
-## Why Croktile?
-
-Traditional GPU programming with CUDA requires managing:
-
-- Buffer allocation and deallocation
-- Index calculations
-- DMA descriptor configuration
-- Memory synchronization barriers
-- Thread coordination
-
-Croktile eliminates this boilerplate by letting you focus on **what** data moves **where**, rather than **how** to configure the hardware.
-
-## Core Concepts
-
-### 1. Shaped Types
-
-All data in Croktile has a shape:
-
-```cpp
-f32 [128, 256] matrix;    // 2D tensor
-f32 [M, K] dynamic_input; // Symbolic dimensions
-```
-
-### 2. Declarative Data Movement
-
-```cpp
-dma.copy input.chunkat(tile_m, tile_n) => shared_memory;
-```
-
-### 3. Automatic Safety Checks
-
-The compiler verifies tiling correctness, shape compatibility, and memory bounds at compile time.
+1. [What is Croktile?](/tutorials/what-is-croktile)
+2. [Program structure](/tutorials/program-structure)
+3. [Shapes](/tutorials/shapes)
+4. [Integers and i-tuples](/tutorials/integers-ituples)
+5. [Spanned data](/tutorials/spanned-data)
+6. [Symbolic shapes](/tutorials/symbolic-shapes)
+7. [Parallelism introduction](/tutorials/parallelism-intro)
+8. [SPMD parallelism](/tutorials/spmd-parallelism)
+9. [Loop control](/tutorials/loop-control)
+10. [Basic DMA](/tutorials/basic-dma)
+11. [Tiling with chunkat](/tutorials/tiling-chunkat)
+12. [Input and output](/tutorials/input-output)

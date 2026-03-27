@@ -1,0 +1,118 @@
+---
+title: "Input and output"
+description: "Croktile function parameters, return types, and host APIs for shaped spanned data."
+order: 12
+---
+
+## Overview
+
+This chapter covers how Croktile functions declare inputs and outputs, how the C++ host passes shaped buffers, and how return values are represented on the host.
+
+## Croktile Function Input
+### Input Parameters
+For a Croktile function, it only accepts two types of input parameters: the *spanned data*, and the *integer*.
+
+Similar to any C++ program, the parameter may either be named or unnamed:
+
+```choreo
+__co__ void foo(f32 [7] a, int) {...}
+```
+
+In this example, the second parameter is unnamed, which makes it unable to be reference in the Croktile function. However, this is still the valid code.
+
+
+### C++ Host: Data Argument with Shape
+One obvious gap between C/C++ pointers/arrays and Croktile *spanned data* is that *spanned data* is shaped. Therefore, to call a Croktile function, it is necessary to convert pointers or arrays.
+
+One direct method is to use the Croktile API provided in `croktile.h`. Though programs does not necessary to explicitly include `croktile.h` in Croktile compilation environment, it is included for every Croktile-C++ programs. 
+
+```choreo
+__co__ void foo(f32 [7, 16] input, f32 [7, 16] output) {...}
+
+void entry(float * input, float* output) {
+  // foo(input, output); <-- result in error since missing shape
+
+  foo(choreo::make_spanned<2>(input, {7, 16}),
+      choreo::make_spanned<2>(output, {7, 16}));
+}
+```
+
+In the above example, we make use of `croktile::make_spanned` function template, providing the rank as template parameter, and typed pointer together with shape list as the function parameters. In this way, a shape is attached with the pointer, which makes a valid Croktile function parameter. As you may figure out from `croktile.h`, it results in `croktile::spanned_view` object, which simply wraps the C/C++ pointer/array and the array-based list. To make it easy to understand, we list simplified definition is like:
+
+```cpp
+template <typename T, size_t Rank>
+class spanned_view {
+  T* ptr;                 // typed pointer to the data
+  size_t dims[Rank];      // ranked dimensions
+};
+```
+
+It is also possible to have variable as dimensions to construct the shaped data, like following:
+
+```choreo
+__co__ void foo(f32 [7, 16] input) {...}
+
+void entry(float * input, float* output, int M, int N) {
+  foo(choreo::make_spanned<2>(input, {M, N})),
+}
+```
+In this example, the `input` shape is runtime variable. But do not worry if wrong parameter is provided. Croktile will check if `M == 7` and `N == 16` when entering into the tileflow program. **If not, the program will terminate immediately** since all the assumptions about shapes in the Croktile function does not hold.
+
+One important notice for the *spanned data* inputs is that they are **references to the input data/buffers**. That implies no data copy happens at invoking Croktile function, though somebody may think from the language perspective it look like copy-semantics.
+
+## Croktile Function Output
+### Return Type and Type Deduction
+Similar to the input, *spanned data* and *integer* are valid output types. The *void* type is also allowed if nothing is returned.
+
+In addition to the explicit return type annotation, Croktile support type inference on returns. For example:
+
+```choreo
+__co__ auto foo() {
+  f32 [7, 16] result;
+  // ...
+  return result;
+}
+```
+In this code, the return type is annotated as `auto`, which is the same keyword as C++. Croktile is capable of inferring return type as `f32 [7, 16]`. Therefore, it is recommended to use `auto` whenever possible.
+
+### C++ Host: Shape Return
+
+The C++ host code that receives the output of Croktile function actually receives a buffer. Semantics, the return must be copied than reference, or else it returns a reference to an object allocated in the called function. For example:
+
+```choreo
+__co__ auto foo() {
+  f32 [7, 16] output;
+  // ...
+  return output;  // semantically copy
+}
+
+void entry() {
+  auto result = foo(); // move the 'spanned_data' to caller
+  // ...
+}
+```
+
+In this example, the `output` is semantically copied to the caller. However, in Croktile's implementation, no copy happens. The returned type is `croktile::spanned_data`, where its simplified definition is as following:
+
+```cpp
+template <typename T, size_t Rank>
+class spanned_data {
+  std::unique_ptr<T[]> ptr; // move only pointers
+  size_t dims[Rank];        // ranked dimensions
+};
+```
+
+In contrary to `croktile::spanned_view`, `croktile::spanned_data` owns the buffer it points to. Thus there is **no copy actually happen when returning from a Croktile function**. In compiler's term, this is called the *Return Value Optimization*.
+
+You may use member function like `.rank()`, `.shape()` to query shape related information of Croktile return. This allows you able to work without knowing the too much detail about Croktile function.
+
+## More Questions
+Like C++ functions, Croktile functions can be defined anyway in the source code. one common raised question is about the **function signature**, as long as programmers may want to link the module with Croktile function definition.
+
+The answer is that Croktile function follows the C++ calling convention, which makes it standard C++ function with C++ name mangling. Note that **`extern "C"`** is not possible for a Croktile function, since it utilize C++ template-based object as its parameter type (spanned data).
+
+However, there are some features yet to support:
+
+- Croktile function declaration without definition. This allows calling Croktile function from another module.
+- Croktile function with `inline`. This allows the Croktile function be used in headers.
+

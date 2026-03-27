@@ -1,0 +1,24 @@
+---
+title: "Contributing"
+description: "How to build, test, and submit changes to Croktile."
+order: 20
+---
+
+## Overview
+
+Croktile development follows a typical open-source workflow: fork the repository, work on a branch, and open a pull request with a clear description of the change and how it was tested.
+
+## Build and tests
+
+After [building from source](/docs/getting-started), run the test suite regularly:
+
+```bash
+make test
+```
+
+Use `make help` to see other maintenance targets. For operator samples, `make sample-test` runs the sample tests; narrow with `make sample-test-operator OPERATOR=add` (and other operator names as supported).
+
+## Pull requests
+
+Keep changes focused, match existing style, and include tests when you add or fix behavior. Report build or test failures with enough context (target platform, compiler version, and the failing command) so others can reproduce the issue.
+

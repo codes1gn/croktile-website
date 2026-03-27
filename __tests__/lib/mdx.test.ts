@@ -13,6 +13,7 @@ describe("mdx content utilities", () => {
       expect(slugs).toContain("shapes");
       expect(slugs).toContain("parallel");
       expect(slugs).toContain("dma");
+      expect(slugs).toContain("getting-started");
     });
 
     it("returns slugs for tutorials/en", () => {
@@ -40,9 +41,14 @@ describe("mdx content utilities", () => {
     it("reads docs content with frontmatter", () => {
       const item = getContentBySlug("docs", "index", "en");
       expect(item).not.toBeNull();
-      expect(item!.meta.title).toBe("Getting Started with Croktile");
-      expect(item!.meta.order).toBe(1);
-      expect(item!.content).toContain("## Installation");
+      expect(item!.meta.title).toBe("Croktile documentation");
+      expect(item!.meta.order).toBe(0);
+      expect(item!.content).toContain("## Documentation map");
+
+      const gettingStarted = getContentBySlug("docs", "getting-started", "en");
+      expect(gettingStarted).not.toBeNull();
+      expect(gettingStarted!.meta.order).toBe(1);
+      expect(gettingStarted!.content).toContain("make test");
     });
 
     it("reads blog content with date and tags", () => {

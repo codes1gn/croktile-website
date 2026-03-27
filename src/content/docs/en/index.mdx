@@ -1,51 +1,26 @@
 ---
-title: "Getting Started with Croktile"
-description: "Learn how to install and use the Croktile compiler for TileFlow GPU programming."
-order: 1
+title: "Croktile documentation"
+description: "Overview and links to Croktile / TileFlow reference documentation."
+order: 0
 ---
 
-## Installation
+Croktile is a C++ embedded DSL for **TileFlow** programming: you describe shaped data, DMA moves, and parallel regions, and the compiler lowers to target code (for example CUDA/Cute) with strong shape and DMA safety checks.
 
-Download the latest release from the [Croktile releases page](https://croktile.io) and follow the platform-specific instructions.
+Use the pages below for deeper reference. If you are new, start with **Getting started** (build and compiler options), then skim **Syntax design** and the topic that matches your task (shapes, parallelism, DMA, or dynamic dimensions).
 
-### Prerequisites
+## Documentation map
 
-- **C++ Compiler**: GCC 9.0+ or Clang 5.0+
-- **CMake**: 3.16+
-- **CUDA Toolkit**: 11.0+ (for GPU targets)
+- [Getting started](/docs/getting-started) — build from source, `make test`, compiler flags (`-t`, `-es`, `-gs`, `-E`, …)
+- [Shaped data manipulation](/docs/shapes) — shapes, `span`, and symbolic dimensions (overview)
+- [Parallel execution](/docs/parallel) — SPMD regions and loop constructs (overview)
+- [DMA and data movement](/docs/dma) — DMA overview and chunking
+- [TileFlow tiling optimisation](/docs/tileflow-optimization) — matmul and rgb2gray examples, tiling with `chunkat` and `#`
+- [Async DMA patterns](/docs/async-dma-patterns) — futures, sync vs async DMA, `wait`, operation types
+- [Multi-buffering](/docs/multi-buffering) — double-buffering with `dma.any`, `swap`, and `rotate`
+- [Syntax design](/docs/syntax-design) — types, control flow, DMA statements, `chunkat`, calls
+- [Dynamic shapes](/docs/dynamic-design) — anonymous and symbolic dimensions
+- [Calling device functions](/docs/calling-functions) — `call`, templates, target notes
+- [Macros and preprocessing](/docs/macros) — defines, `ifdef`, preprocessor vs C++
+- [Thread masking](/docs/thread-masking) — `inthreads`, masks, async `inthreads`
+- [Contributing](/docs/contributing) — tests and pull requests
 
-### Build from Source
-
-```bash
-git clone https://github.com/croktile/croktile.git
-cd croktile
-make build
-```
-
-After building, the `croktile` compiler binary will be available in the `build/` directory.
-
-## Your First Croktile Program
-
-Create a file named `hello.co`:
-
-```cpp
-__co__ auto add(f32 [N] a, f32 [N] b) {
-  f32 [N] output;
-  parallel (threadIdx) {
-    output = a + b;
-  }
-  return output;
-}
-```
-
-Compile and run:
-
-```bash
-croktile compile hello.co -t cute
-```
-
-## What's Next?
-
-- [Shaped Data Manipulation](/docs/shapes)
-- [Parallel Execution](/docs/parallel)
-- [DMA and Data Movement](/docs/dma)
