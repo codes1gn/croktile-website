@@ -14,6 +14,7 @@ const navLinks = [
   { href: `${TUTORIAL_BASE}/`, labelKey: "tutorials", external: true },
   { href: `${TUTORIAL_BASE}/`, labelKey: "docs", external: true },
   { href: "/changelog", labelKey: "changelog" },
+  { href: "/roadmap", labelKey: "roadmap" },
 ] as const;
 
 export function Navbar() {

@@ -4,6 +4,7 @@
     "tutorials": "教程",
     "docs": "文档",
     "changelog": "更新日志",
+    "roadmap": "路线图",
     "blog": "博客",
     "getStarted": "开始使用",
     "github": "GitHub"
@@ -85,6 +86,24 @@
     "discord": "Discord",
     "about": "关于",
     "contact": "联系我们"
+  },
+  "roadmap": {
+    "title": "路线图",
+    "subtitle": "跟随鳄鱼穿越未知大陆",
+    "current": "当前位置",
+    "tbc": "未完待续…",
+    "m1_title": "Python DSL",
+    "m1_desc": "CroqTile 内核的一等 Python 前端",
+    "m2_title": "算子库",
+    "m2_desc": "面向常见 AI 负载的生产级算子库",
+    "m3_title": "多设备编程",
+    "m3_desc": "无缝的多 GPU 和分布式内核编排",
+    "m4_title": "AI 调优助手",
+    "m4_desc": "7×24 自主 AI 代理持续优化",
+    "m5_title": "完整 MCP 技能集",
+    "m5_desc": "AI 辅助开发的完整 MCP 工具套件",
+    "m6_title": "私有 DSA 支持",
+    "m6_desc": "将 CroqTile 扩展到 GPU 之外的定制加速器"
   },
   "common": {
     "lightMode": "浅色模式",

@@ -7,7 +7,7 @@ export const dynamic = "force-static";
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://croqtile.io";
 
-  const staticRoutes = ["", "/docs", "/tutorials", "/changelog"];
+  const staticRoutes = ["", "/docs", "/tutorials", "/changelog", "/roadmap"];
 
   const entries: MetadataRoute.Sitemap = [];
 
