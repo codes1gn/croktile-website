@@ -2,6 +2,7 @@ import { getAllContent } from "@/lib/mdx";
 import {
   Hero,
   FeatureEasyToUse,
+  FeatureZeroCost,
   FeatureSafety,
   FeatureDynamic,
   FeatureAI,
@@ -27,6 +28,7 @@ export default async function HomePage({ params }: Props) {
       <Hero />
       <div id="features">
         <FeatureEasyToUse />
+        <FeatureZeroCost />
         <FeatureSafety />
         <FeatureDynamic />
         <FeatureAI />

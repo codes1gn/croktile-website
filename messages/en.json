@@ -28,6 +28,17 @@
       "point3": "Make parallel programs easier to write and reason about",
       "point4": "Seamless C++ and Python integration — use CroqPy or link any C++ library"
     },
+    "zeroCost": {
+      "title": "Zero-Cost Abstraction",
+      "subtitle": "High-level code, vendor-matching speed",
+      "desc1": "Match or exceed optimized vendor libraries with near-zero performance gap",
+      "desc2": "No runtime overhead — static dispatch, no vtable, no interpreter",
+      "desc3": "End-to-end LLM serving within 5% of native on Hopper",
+      "desc4": "Compiles to the same optimal PTX as hand-tuned CUDA",
+      "e2eNote": "Model-level throughput is slightly below native because certain corner-case shapes and attention fusions still require tuning. Kernel-level performance already matches or exceeds vendors — the remaining gap closes as we tune more operator variants.",
+      "whyTitle": "Design Philosophy",
+      "whyBody": "Provide easy-to-use, high-level abstractions while eliminating runtime cost as much as possible through compile-time optimizations. You write concise, readable code; the compiler resolves abstractions via static dispatch and shape specialization to produce near-optimal code."
+    },
     "safety": {
       "title": "Compile-Time Safety",
       "subtitle": "Catch bugs before they run",
@@ -53,14 +64,11 @@
     "ai": {
       "title": "Born for AI Tuning",
       "subtitle": "Language meets machine intelligence",
-      "desc1": "Language designed from scratch for AI-assisted optimization",
-      "desc2": "Compact syntax keeps entire kernels inside AI context windows",
-      "desc3": "AI achieved 1127 TFLOPS from 671 baseline in a single session",
-      "desc4": "Well-documented CLI and structured errors for autonomous agents",
-      "point1": "Compact syntax perfect for AI context windows",
-      "point2": "Hidden error-prone configs behind simple primitives",
-      "point3": "CLI tools and arguments well-documented for AI agents",
-      "point4": "Compile-time checks guard against AI-confusing bugs"
+      "desc1": "~500 tokens per kernel — highest source density among GPU DSLs, keeping entire kernels inside AI context windows",
+      "desc2": "Unified primitives (dma.copy, mma.row) hide error-prone boilerplate, reducing token overhead and AI confusion",
+      "desc3": "353 compile-time + 1,319 runtime checks serve as AI guardrails — 200+ autonomous iterations without failure",
+      "desc4": "Structured, AI-readable compiler diagnostics and well-documented CLI for autonomous tuning agents",
+      "desc5": "AI achieved 1127 TFLOPS from 671 baseline (+67.9%) in a single session of 68 iterations"
     }
   },
   "footer": {

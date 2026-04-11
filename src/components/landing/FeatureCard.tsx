@@ -9,6 +9,8 @@ type Props = {
   subtitle: string;
   description?: string;
   descBullets?: string[];
+  leftFooter?: ReactNode;
+  bottomContent?: ReactNode;
   children?: ReactNode;
   reversed?: boolean;
 };
@@ -19,6 +21,8 @@ export function FeatureCard({
   subtitle,
   description,
   descBullets,
+  leftFooter,
+  bottomContent,
   children,
   reversed = false,
 }: Props) {
@@ -53,12 +57,18 @@ export function FeatureCard({
                   {description}
                 </p>
               ) : null}
+              {leftFooter && <div className="mt-6">{leftFooter}</div>}
             </ScrollReveal>
           </div>
           <div className="flex-1 w-full max-w-xl">
             <ScrollReveal delay={0.15}>{children}</ScrollReveal>
           </div>
         </div>
+        {bottomContent && (
+          <ScrollReveal delay={0.3}>
+            <div className="mt-12">{bottomContent}</div>
+          </ScrollReveal>
+        )}
       </div>
     </section>
   );

@@ -11,8 +11,8 @@ const TUTORIAL_BASE = "https://codes1gn.github.io/croqtile-tutorial";
 
 const navLinks = [
   { href: "/", labelKey: "product" },
-  { href: `${TUTORIAL_BASE}/tutorial/`, labelKey: "tutorials", external: true },
-  { href: `${TUTORIAL_BASE}/documentation/`, labelKey: "docs", external: true },
+  { href: `${TUTORIAL_BASE}/`, labelKey: "tutorials", external: true },
+  { href: `${TUTORIAL_BASE}/`, labelKey: "docs", external: true },
   { href: "/changelog", labelKey: "changelog" },
 ] as const;
 
@@ -51,7 +51,7 @@ export function Navbar() {
               className="h-9 w-9 rounded-md object-contain"
             />
             <span className="text-lg font-bold tracking-tight">
-              <span className="text-mint-500">Crok</span>
+              <span className="text-mint-500">Croq</span>
               <span className="text-[var(--foreground)]">Tile</span>
             </span>
           </Link>

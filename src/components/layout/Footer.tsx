@@ -13,8 +13,8 @@ export function Footer() {
     {
       title: t("product"),
       links: [
-        { label: t("tutorials"), href: `${tutorialBase}/tutorial/`, external: true },
-        { label: t("docs"), href: `${tutorialBase}/documentation/`, external: true },
+        { label: t("tutorials"), href: `${tutorialBase}/`, external: true },
+        { label: t("docs"), href: `${tutorialBase}/`, external: true },
       ],
     },
     {
@@ -41,7 +41,7 @@ export function Footer() {
               className="h-8 w-8 rounded-md object-contain"
               />
               <span className="text-lg font-bold tracking-tight">
-                <span className="text-mint-500">Crok</span>Tile
+                <span className="text-mint-500">Croq</span>Tile
               </span>
             </Link>
             <p className="mt-3 text-sm text-[var(--muted-foreground)] max-w-xs">

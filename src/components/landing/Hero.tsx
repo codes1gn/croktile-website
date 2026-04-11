@@ -99,7 +99,7 @@ const codeExamples = [
   },
   {
     label: "FP8 Matmul (CroqPy)",
-    file: "matmul_e4m3.py",
+    file: "matmul_e4m3.py (CroqTile Python)",
     lang: "python",
     code: `import croq
 
@@ -130,7 +130,7 @@ print(prog.dump_ast())`,
   },
   {
     label: "TMA Matmul (CroqPy)",
-    file: "matmul_tma.py",
+    file: "matmul_tma.py (CroqTile Python)",
     lang: "python",
     code: `import croq
 
@@ -198,9 +198,6 @@ export function Hero() {
             <span className="font-black text-mint-500 dark:text-mint-400 text-[1.12em] sm:text-[1.1em] lg:text-[1.08em] shrink-0">
               {t("brand")}
             </span>
-            <span className="text-[var(--muted-foreground)] font-extrabold shrink-0">
-              —
-            </span>
             <span className="font-extrabold text-balance">{t("tagline")}</span>
           </motion.h1>
 
@@ -220,7 +217,7 @@ export function Hero() {
             className="mt-10 flex flex-col sm:flex-row gap-4"
           >
             <a
-              href="https://codes1gn.github.io/croqtile-tutorial/documentation/"
+              href="https://codes1gn.github.io/croqtile-tutorial/"
               target="_blank"
               rel="noopener noreferrer"
               className="px-8 py-3.5 text-sm font-semibold bg-mint-500 text-white rounded-xl

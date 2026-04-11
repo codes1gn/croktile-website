@@ -78,8 +78,7 @@ Hidden:    0 error-prone configs exposed
 
 AI iterates 68 times in one session,
 reaching 1127 TFLOPS from 671 baseline.
-Each iteration: edit .co → compile → run → NCU
-Average cycle: ~3 minutes per iteration.`,
+Each iteration: edit .co → compile → run → NCU`,
   },
 ];
 
@@ -89,8 +88,6 @@ export function FeatureAI() {
   const t = useTranslations("features.ai");
   const [activeSession, setActiveSession] = useState(0);
   const [showResults, setShowResults] = useState(false);
-
-  const points = [t("point1"), t("point2"), t("point3"), t("point4")];
 
   return (
     <FeatureCard
@@ -103,23 +100,10 @@ export function FeatureAI() {
       }
       title={t("title")}
       subtitle={t("subtitle")}
-      descBullets={[t("desc1"), t("desc2"), t("desc3"), t("desc4")]}
+      descBullets={[t("desc1"), t("desc2"), t("desc3"), t("desc4"), t("desc5")]}
       reversed
     >
       <div className="space-y-5">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          {points.map((point, i) => (
-            <ScrollReveal key={i} delay={i * 0.05}>
-              <div className="flex items-start gap-2 text-sm">
-                <svg className="w-4 h-4 text-mint-500 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <path d="M20 6L9 17l-5-5" />
-                </svg>
-                <span className="text-[var(--muted-foreground)]">{point}</span>
-              </div>
-            </ScrollReveal>
-          ))}
-        </div>
-
         {/* Tabbed AI session */}
         <ScrollReveal delay={0.15}>
           <div className="rounded-xl border bg-[var(--card)] overflow-hidden">
@@ -265,6 +249,36 @@ export function FeatureAI() {
             671 → 1127 TFLOPS (+67.9%) in 68 AI-driven iterations
           </p>
         </ScrollReveal>
+
+        {/* AI-Tune Convergence Chart */}
+        <ScrollReveal delay={0.35}>
+          <div className="rounded-xl border overflow-hidden">
+            <div className="px-4 py-2.5 border-b bg-[var(--muted)] flex items-center justify-between">
+              <span className="text-xs font-medium text-[var(--muted-foreground)]">
+                AI-Tune Convergence · E4M3 4096×8192×8192
+              </span>
+              <span className="text-[10px] font-mono text-mint-500">TFLOPS vs Iteration</span>
+            </div>
+            <div className="p-3">
+              <img
+                src="/autotune-convergence.svg?v=3"
+                alt="AI tuning convergence: 671→1127 TFLOPS across 68 iterations"
+                className="w-full h-auto rounded dark:hidden"
+              />
+              <img
+                src="/autotune-convergence-dark.svg?v=3"
+                alt="AI tuning convergence: 671→1127 TFLOPS across 68 iterations"
+                className="w-full h-auto rounded hidden dark:block"
+              />
+            </div>
+            <div className="px-4 py-2 border-t bg-[var(--muted)]/30 text-center">
+              <span className="text-[10px] text-[var(--muted-foreground)]">
+                671 → 1127 TFLOPS (+67.9%) across 68 AI-driven iterations
+              </span>
+            </div>
+          </div>
+        </ScrollReveal>
+
       </div>
     </FeatureCard>
   );

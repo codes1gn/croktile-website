@@ -7,7 +7,7 @@ import { ScrollReveal } from "./ScrollReveal";
 const metrics = [
   { value: "62%", label: "less code than CUDA+CuTe" },
   { value: "353", label: "compile-time checks" },
-  { value: "1128", label: "peak TFLOPS (FP8)" },
+  { value: "~500", label: "tokens/iter — 70% less than CUDA tuning" },
 ];
 
 export function BottomCTA() {
@@ -54,7 +54,7 @@ export function BottomCTA() {
         <ScrollReveal delay={0.2}>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href="https://codes1gn.github.io/croqtile-tutorial/documentation/"
+              href="https://codes1gn.github.io/croqtile-tutorial/"
               target="_blank"
               rel="noopener noreferrer"
               className="px-8 py-3.5 text-sm font-semibold bg-mint-500 text-white rounded-xl

@@ -1,5 +1,6 @@
 export { Hero } from "./Hero";
 export { FeatureEasyToUse } from "./FeatureEasyToUse";
+export { FeatureZeroCost } from "./FeatureZeroCost";
 export { FeatureSafety } from "./FeatureSafety";
 export { FeatureDynamic } from "./FeatureDynamic";
 export { FeatureAI } from "./FeatureAI";
