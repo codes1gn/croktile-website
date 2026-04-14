@@ -154,6 +154,17 @@ html:not(.dark) .shiki-wrapper [data-theme="dark"] {
   display: none !important;
 }
 
+/* FeatureAI convergence chart: class-based light/dark swap */
+.ai-convergence-dark {
+  display: none;
+}
+.dark .ai-convergence-light {
+  display: none;
+}
+.dark .ai-convergence-dark {
+  display: block;
+}
+
 /* Prose typography refinements */
 .prose-custom {
   line-height: 1.8;
