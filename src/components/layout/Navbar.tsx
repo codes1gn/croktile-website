@@ -7,7 +7,7 @@ import { ThemeToggle } from "./ThemeToggle";
 import { LangSwitch } from "./LangSwitch";
 import { useEffect, useState } from "react";
 
-const TUTORIAL_BASE = "https://codes1gn.github.io/croqtile-tutorial";
+const TUTORIAL_BASE = "https://lancerlab.github.io/croqtile-tutorial";
 
 const navLinks = [
   { href: "/", labelKey: "product" },

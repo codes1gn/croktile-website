@@ -217,7 +217,7 @@ export function Hero() {
             className="mt-10 flex flex-col sm:flex-row gap-4"
           >
             <a
-              href="https://codes1gn.github.io/croqtile-tutorial/"
+              href="https://lancerlab.github.io/croqtile-tutorial/"
               target="_blank"
               rel="noopener noreferrer"
               className="px-8 py-3.5 text-sm font-semibold bg-mint-500 text-white rounded-xl

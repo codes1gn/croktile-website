@@ -7,7 +7,7 @@ export function Footer() {
   const t = useTranslations("footer");
   const year = new Date().getFullYear();
 
-  const tutorialBase = "https://codes1gn.github.io/croqtile-tutorial";
+  const tutorialBase = "https://lancerlab.github.io/croqtile-tutorial";
 
   const sections = [
     {
