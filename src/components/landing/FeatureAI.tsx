@@ -261,12 +261,12 @@ export function FeatureAI() {
             </div>
             <div className="p-3">
               <img
-                src="/autotune-efficacy-convergence.svg"
+                src="../autotune-efficacy-convergence.svg"
                 alt="AI tuning convergence: 671→1127 TFLOPS across 68 iterations"
                 className="w-full h-auto rounded ai-convergence-light"
               />
               <img
-                src="/autotune-efficacy-convergence-dark.svg"
+                src="../autotune-efficacy-convergence-dark.svg"
                 alt="AI tuning convergence: 671→1127 TFLOPS across 68 iterations"
                 className="w-full h-auto rounded ai-convergence-dark"
               />
