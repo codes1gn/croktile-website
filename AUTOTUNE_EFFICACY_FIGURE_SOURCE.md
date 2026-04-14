@@ -20,3 +20,13 @@ npm run gen:autotune-efficacy-figure
   - `croktile-slides/assets/figures/autotune-efficacy-convergence.svg`
 - Script lineage:
   - adapted from `gemm_sp_paper/figures/src/autotune-efficacy-convergence.js`
+
+## Tracked upstream source bundle
+
+To ensure all related figure sources are tracked in this repository, we mirror:
+
+- `figure-sources/autotune-efficacy/autotune-efficacy-convergence.svg`
+- `figure-sources/autotune-efficacy/website-convergence.svg`
+- `figure-sources/autotune-efficacy/website-convergence-dark.svg`
+- `figure-sources/autotune-efficacy/gen-website-convergence.js`
+- `figure-sources/autotune-efficacy/autotune-efficacy-convergence.js`
